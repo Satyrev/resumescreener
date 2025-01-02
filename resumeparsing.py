@@ -40,12 +40,13 @@ def parse_resume(file_path):
 
 def preprocess_text(text):
     
-    text = re.sub(r"[^a-zA-Z\s]", "", text)
+    text = re.sub(r"[^a-zA-Z0-9#\+\s]", "", text)
     
     text = text.lower()
     
     keywords = text.split()
     return " ".join(keywords)
+
 
 
 
@@ -72,11 +73,12 @@ for file_path in resume_files:
     try:
         parsed_text = preprocess_text(parse_resume(file_path))
         cursor.execute("""
-            INSERT INTO resumes (resume_id, file_path, parsed_text)
-            VALUES (?, ?, ?)
-            """, resume_id, file_path, parsed_text)
+            INSERT INTO resumes (file_path, parsed_text)
+            VALUES (?, ?)
+            """, file_path, parsed_text)
 
         connection.commit()
+
         print(f"Inserted: {file_path}")
         resume_id += 1  
     except Exception as e:
