@@ -11,7 +11,7 @@ SKILL_KEYWORDS = [
     "python", "java", "sql", "tensorflow", "machine learning", "data analysis",
     "project management", "git", "linux", "scripting", "cloud", "kubernetes",
     "golang", "pytorch", "sklearn", "azure", "aws", "gcp", "mlops", "neural networks",
-    "transformers", "generative ai", "llms"
+    "transformers", "generative ai", "llms" 
 ]
 
 def extract_required_skills(text):
@@ -40,11 +40,6 @@ def parse_job_file(file_path):
     else:
         raise ValueError(f"Unsupported file type: {ext}")
 
-import re
-
-import re
-
-import re
 
 def extract_job_title(text):
     title_patterns = [
