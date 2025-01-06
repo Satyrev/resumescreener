@@ -69,15 +69,48 @@ def extract_required_skills(text):
     return ", ".join(skills)
 
 def parse_job_description(text):
-    patterns_to_remove = [
-        r"(?i)(job title|position|requirements|skills required|about us):.*",
-        r"(?i)(additional information|disclaimer).*",
-        r"(?i)(nokia offers|what we offer).*",
+    job_desc_start = text.find("Job Description:")
+    if job_desc_start == -1:
+        return "Job description section not found"
+    
+    description = text[job_desc_start:]
+    
+    sections = description.split('\n\n')
+    
+    relevant_sections = []
+    
+    for section in sections:
+        if not section.strip():
+            continue
+            
+        skip_patterns = [
+            "Additional Information",
+            "Disclaimer",
+            "About Us",
+            "What we offer",
+            "The above benefits exclude students"
+        ]
+        
+        if not any(pattern in section for pattern in skip_patterns):
+            cleaned_section = section.strip()
+            if cleaned_section:
+                relevant_sections.append(cleaned_section)
+    
+    parsed_description = '\n\n'.join(relevant_sections)
+    
+    metadata_patterns = [
+        r"Organization Name.*?Job Description:",
+        r"Term Posted:.*?(?=\n)",
+        r"Job Duration:.*?(?=\n)",
+        r"Salary.*?(?=\n)",
+        r"Hours Per Week.*?(?=\n)",
+        r"Job Location:.*?(?=\n)"
     ]
-    for pattern in patterns_to_remove:
-        text = re.sub(pattern, "", text, flags=re.DOTALL)
-
-    return text.strip()
+    
+    for pattern in metadata_patterns:
+        parsed_description = re.sub(pattern, "", parsed_description, flags=re.DOTALL)
+    
+    return parsed_description.strip()
 
 
 connection = pyodbc.connect(
