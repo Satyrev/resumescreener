@@ -39,15 +39,10 @@ def parse_resume(file_path):
 
 
 def preprocess_text(text):
-    
     text = re.sub(r"[^a-zA-Z0-9@/#\+.\s]", "", text)
-    
     text = text.lower()
-    
     keywords = text.split()
     return " ".join(keywords)
-
-
 
 
 connection = pyodbc.connect(
@@ -63,9 +58,9 @@ cursor = connection.cursor()
 cursor.execute("SELECT ISNULL(MAX(resume_id), 0) FROM resumes")
 max_resume_id = cursor.fetchone()[0]
 
-resume_id = max_resume_id + 1  
+resume_id = max_resume_id + 1
 
-default_job_id = 1  
+default_job_id = 1
 
 resume_files = glob.glob("C:/Users/Asus/Desktop/resumes/*.*")
 
@@ -80,7 +75,7 @@ for file_path in resume_files:
         connection.commit()
 
         print(f"Inserted: {file_path}")
-        resume_id += 1  
+        resume_id += 1
     except Exception as e:
         print(f"Failed to process {file_path}: {e}")
 
