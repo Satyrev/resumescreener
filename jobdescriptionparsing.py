@@ -1,11 +1,8 @@
 import os
 import re
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
-from docx import Document
-from PyPDF2 import PdfReader
-import pyodbc 
 from sklearn.feature_extraction.text import TfidfVectorizer
+from docx import Document
+import pyodbc 
 
 SKILL_KEYWORDS = [
     "python", "java", "sql", "tensorflow", "machine learning", "data analysis",
@@ -20,7 +17,6 @@ def extract_required_skills(text):
     matched_skills = vectorizer.get_feature_names_out()[matrix.toarray().any(axis=0)]
     return ", ".join(matched_skills)
 
-
 def parse_word(file_path):
     doc = Document(file_path)
     return "\n".join([paragraph.text for paragraph in doc.paragraphs])
@@ -31,15 +27,12 @@ def parse_text(file_path):
 
 def parse_job_file(file_path):
     _, ext = os.path.splitext(file_path)
-    if ext.lower() == ".pdf":
-        return parse_pdf(file_path)
-    elif ext.lower() == ".docx":
+    if ext.lower() == ".docx":
         return parse_word(file_path)
     elif ext.lower() == ".txt":
         return parse_text(file_path)
     else:
         raise ValueError(f"Unsupported file type: {ext}")
-
 
 def extract_job_title(text):
     title_patterns = [
@@ -57,39 +50,26 @@ def extract_job_title(text):
             return line.strip()
     return "Unknown Title"
 
-
-
-def extract_required_skills(text):
-    skills = [skill for skill in SKILL_KEYWORDS if skill.lower() in text.lower()]
-    return ", ".join(skills)
-
 def parse_job_description(text):
     job_desc_start = text.find("Job Description:")
     if job_desc_start == -1:
         return "Job description section not found"
     
     description = text[job_desc_start:]
-    
     sections = description.split('\n\n')
-    
     relevant_sections = []
     
+    skip_patterns = [
+        "Additional Information",
+        "Disclaimer",
+        "About Us",
+        "What we offer",
+        "The above benefits exclude students"
+    ]
+    
     for section in sections:
-        if not section.strip():
-            continue
-            
-        skip_patterns = [
-            "Additional Information",
-            "Disclaimer",
-            "About Us",
-            "What we offer",
-            "The above benefits exclude students"
-        ]
-        
-        if not any(pattern in section for pattern in skip_patterns):
-            cleaned_section = section.strip()
-            if cleaned_section:
-                relevant_sections.append(cleaned_section)
+        if section.strip() and not any(pattern in section for pattern in skip_patterns):
+            relevant_sections.append(section.strip())
     
     parsed_description = '\n\n'.join(relevant_sections)
     
@@ -107,7 +87,6 @@ def parse_job_description(text):
     
     return parsed_description.strip()
 
-
 connection = pyodbc.connect(
     "DRIVER={SQL Server};"
     "SERVER=YOUR_SERVER"
@@ -123,11 +102,9 @@ for file_name in job_files:
     file_path = os.path.join("C:/Users/Asus/Desktop/job_descriptions", file_name)
     try:
         text = parse_job_file(file_path)
-
         job_title = extract_job_title(text)
         required_skills = extract_required_skills(text)
         job_description = parse_job_description(text)
-        
 
         cursor.execute("""
             INSERT INTO job_descriptions (job_title, required_skills, job_description)
