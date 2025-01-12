@@ -1,9 +1,5 @@
 import pyodbc
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import re
-from collections import Counter
 
 def connect_to_db():
     """Establish database connection"""
@@ -37,34 +33,6 @@ def preprocess_technical_text(text):
     
     text = re.sub(r'([\/\-\+\#])', r' \1 ', text)
     return text.strip()
-
-def extract_required_skills(job_text):
-    """Extract explicitly required skills from job description"""
-    required_skills = set()
-    
-    requirement_patterns = [
-        r'required skills?:?\s*(.*?)(?=\n|$)',
-        r'skills? (?:you|we) (?:need|require|must have):?\s*(.*?)(?=\n|$)',
-        r'skills? and (?:experience|qualifications):?\s*(.*?)(?=\n|$)',
-        r'the skills? you bring:?\s*(.*?)(?=\n|$)',
-        r'technical skills?:?\s*(.*?)(?=\n|$)',
-        r'knowledge (?:in|of):?\s*(.*?)(?=\n|$)',
-        r'have knowledge (?:in|of):?\s*(.*?)(?=\n|$)',
-    ]
-    
-    job_text = job_text.lower()
-    
-    for pattern in requirement_patterns:
-        matches = re.finditer(pattern, job_text)
-        for match in matches:
-            if match.group(1):
-                skills = match.group(1).split(',')
-                for skill in skills:
-                    skill = skill.strip().strip('•-*').strip()
-                    if skill:
-                        required_skills.add(skill)
-    
-    return required_skills
 
 def calculate_enhanced_similarity_improved(resume_text, job_text):
     """Enhanced version to match all relevant skills and calculate match percentage."""
@@ -150,7 +118,6 @@ def calculate_enhanced_similarity_improved(resume_text, job_text):
     
     return final_score, list(matched_skills)
 
-
 def main():
     try:
         connection = connect_to_db()
@@ -167,14 +134,10 @@ def main():
 
         results = []
         for resume in resumes:
-            resume_id = resume[0]
-            file_path = resume[1]
-            resume_text = resume[2]
+            resume_id, file_path, resume_text = resume
             
             for job in job_descriptions:
-                job_id = job[0]
-                job_title = job[1]
-                job_text = job[2]
+                job_id, job_title, job_text = job
                 
                 match_score, matching_skills = calculate_enhanced_similarity_improved(resume_text, job_text)
                 
